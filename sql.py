@@ -1,43 +1,71 @@
 import sqlite3
-import face_recognition
-import cv2
 
-def setup_database():
-    conn = sqlite3.connect('faces.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (id INTEGER PRIMARY KEY, name TEXT, face_encoding BLOB)''')
-    conn.commit()
-    conn.close()
+class Usuarios:
+    def __init__(self, username, face_encoding):
+        self._nome = username
+        self._face_encoding = face_encoding 
+    def __str__(self):
+        return f'Usuário: {self._nome}'
 
-def add_user(name, face_encoding):
-    conn = sqlite3.connect('faces.db')
-    c = conn.cursor()
-    c.execute('INSERT INTO users (name, face_encoding) VALUES (?, ?)',
-              (name, face_encoding))
-    conn.commit()
-    conn.close()
+class Sql:
+    def __init__(self):
+        self.usuarios = []
+        self.setup_database()
 
-def get_users():
-    conn = sqlite3.connect('faces.db')
-    c = conn.cursor()
-    c.execute('SELECT * FROM users')
-    users = c.fetchall()
-    conn.close()
-    return users
+    def __str__(self):
+        return f'Classe para manipulação de banco de dados'
 
-def update_user(user_id, name, face_encoding):
-    conn = sqlite3.connect('faces.db')
-    c = conn.cursor()
-    c.execute('UPDATE users SET name = ?, face_encoding = ? WHERE id = ?',
-              (name, face_encoding, user_id))
-    conn.commit()
-    conn.close()
+    def setup_database(self):
+        with sqlite3.connect('faces.db') as bancoSQlite:
+            bancoCursor = bancoSQlite.cursor()
+            bancoCursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT,
+                    face_encoding TEXT
+                )
+            ''')
+            bancoSQlite.commit()
 
-def delete_user(user_id):
-    conn = sqlite3.connect('faces.db')
-    c = conn.cursor()
-    c.execute('DELETE FROM users WHERE id = ?', (user_id,))
-    conn.commit()
-    conn.close()
+    def add_user(self, name, face_encoding):
+        try:
+            with sqlite3.connect('faces.db') as bancoSQlite:
+                bancoCursor = bancoSQlite.cursor()
+                bancoCursor.execute('INSERT INTO users (name, face_encoding) VALUES (?, ?)',
+                          (name, face_encoding))
+                print(f"Usuário {name} adicionado com sucesso.")
+                bancoSQlite.commit()
+        except sqlite3.Error as e:
+            print(f"Erro ao adicionar usuário: {e}")
 
+    def get_users(self):
+        try:
+            with sqlite3.connect('faces.db') as bancoSQlite:
+                bancoCursor = bancoSQlite.cursor()
+                bancoCursor.execute('SELECT * FROM users')
+                users = bancoCursor.fetchall()
+                print(f" Lista de usuários: {users}")
+        except sqlite3.Error as e:
+            print(f"Erro ao obter usuários: {e}")
+            
+
+    def update_user(self, user_id, name, face_encoding):
+        try:
+            with sqlite3.connect('faces.db') as bancoSQlite:
+                bancoCursor = bancoSQlite.cursor()
+                bancoCursor.execute('UPDATE users SET name = ?, face_encoding = ? WHERE id = ?',
+                          (name, face_encoding, user_id))
+                bancoSQlite.commit()
+                print(f"Usuário {name} atualizado com sucesso.")
+        except sqlite3.Error as e:
+            print(f"Erro ao atualizar usuário: {e}")
+
+    def delete_user(self, user_id):
+        try:
+            with sqlite3.connect('faces.db') as bancoSQlite:
+                bancoCursor = bancoSQlite.cursor()
+                bancoCursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
+                bancoSQlite.commit()
+                print(f"Usuário {user_id} deletado com sucesso.")
+        except sqlite3.Error as e:
+            print(f"Erro ao deletar usuário: {e}")

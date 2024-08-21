@@ -34,29 +34,29 @@ class FacialRecognitionApp:
 		self.view_button = tk.Button(self.root, text="Visualizar Usuários", command=self.view_users)
 		self.view_button.pack()
 
+		self.remove_button = tk.Button(self.root, text="Remover Usuário", command=self.remove_user)
+		self.remove_button.pack()
+
+		self.update_button = tk.Button(self.root, text="Atualizar Usuário", command=self.update_user)
+		self.update_button.pack()
+
 	def update_video(self):
-        # Captura um frame da câmera
 		ret, frame = self.cap.read()
         
 		if ret:
-            # Converte o frame de BGR para RGB
+            
 			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             
-            # Converte a imagem do OpenCV para uma imagem do PIL
 			image = Image.fromarray(frame)
             
-            # Converte a imagem do PIL para um formato que o Tkinter pode exibir
 			tk_image = ImageTk.PhotoImage(image=image)
             
-            # Atualiza o Label com a nova imagem
 			self.video_label.configure(image=tk_image)
 			self.video_label.image = tk_image
 
-        # Atualiza a imagem a cada 30 ms
 		self.root.after(30, self.update_video)
 
 	def __del__(self):
-        # Libera a captura de vídeo ao fechar o aplicativo
 		if self.cap.isOpened():
 			self.cap.release()
 	def add_user_button(self):
